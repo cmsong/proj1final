@@ -8,9 +8,7 @@
   <name>project1final Maven Webapp</name>
   <url>http://maven.apache.org</url>
 
-<build>
-        <finalName>${project.artifactId}</finalName>
-   </build>
+
  <dependencies>
     
     <dependency>
@@ -44,6 +42,6 @@
                 </configuration>
             </plugin>
         </plugins>
-    <finalName>project1final</finalName>
+    <finalName>${project.artifactId}</finalName>
   </build>
 </project>
