@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <style>
+        body{
+            background-image: url('https://images.pexels.com/photos/730896/pexels-photo-730896.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260');
+            background-size:cover;
+            color: white;
+        }
+        h1#titling
+        { 
+            padding-left: 1cm;
+            margin-top:100px;
+        }
+        input
+        {
+            color: black;
+        }
+        button
+        {
+            margin-left:100px;
+            margin-top:20px;
+        }
+        div#requestform{
+            display:none;
+            margin-left:30px;
+            border: 4px solid grey;
+            width: 350px;
+        }
+        div#requestview{
+            display:none;
+            margin-left:30px;
+            border: 4px solid grey;
+            width: 350px;
+        }
+        div#subrequests1{  
+            display:none;
+            margin-left:30px;
+            border: 4px solid grey;
+            width: 350px; 
+        }
+        div#successmsg{
+            display:block;
+        }
+        div#logger{
+            text-align: right;
+            padding-right: 15px;
+            padding-top: 15px;
+        }
+        </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body onload="getUsername()"> 
+    <div id="logger"><button type="button" onClick="logout()" class="btn btn-warning"> Logout </button></div>
+    <h2 id="titling"></h2><br>
+    <button type="button" onClick="displayRequests()" class="btn btn-warning"> See personal requests </button><br><br>
+    <div id="requestview">Displaying Requests</div>
+    
+    <button type="button" onClick="submitRequest()" class="btn btn-warning"> Open a new request </button><br><br
+    ><div id="requestform">
+        Event type: <select style="color:black" id="eventtype">
+            <option value="1">University Course</option>
+            <option value="2">Seminar</option>
+            <option value="3">Certification Prep Course</option>
+            <option value="4">Certification</option>
+            <option value="5">Tech Training</option>
+            <option value="6">Other</option>
+          </select> <br>
+        Price: <input type="text" id="price"> <br>
+        Location: <input type="text" id="loc"><br>
+        Grading format: <input type="text" id="gformat"><br>
+        Passing grade: <input type="text" id="pgrade"><br>
+        Description: <input type="text" id="desc"><br> 
+        <button type="button" onClick="newRequest()" class="btn btn-warning">Submit </button type="button">
+        <div id="successmsg"></div></div> 
+    <button type="button" onClick="approveRequest()" class="btn btn-warning">Approve/Deny Requests</button type="button"><br><br>
+    <div id="subrequests1"><div id="subrequests"></div>
+        <input type="text" id="selection1"><br>
+        <button onClick="submitAccept()" class="btn btn-warning">Approve</button>
+        <button onClick="denyAccept()" class="btn btn-warning">Deny</button>
+    <div id="successmsg2"> </div></div>
+    
+<script>
+function getUsername() {
+	console.log("in js getUsername()");
+	let xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200){
+			let name = this.responseText;
+			document.getElementById("titling").innerHTML = "Welcome " + name;
+		}
+	}
+	xhttp.open("GET", "http://localhost:8080/project1final/getuser.do", true);
+	xhttp.send();
+}
+function submitRequest() {
+    hideAll();
+    console.log('opened request div');
+    var rform = document.getElementById('requestform');
+    rform.style.display = 'block';
+    console.log(rform.style.display);
+}
+function newRequest() {
+ 
+    console.log("attempt submit new request now");
+    let xhttp = new XMLHttpRequest();
+    let eventtype2 = document.getElementById("eventtype").value;
+    let price2 = document.getElementById("price").value;
+    let loc2 = document.getElementById("loc").value;
+    let gformat2 = document.getElementById("gformat").value;
+    let pgrade2 = document.getElementById("pgrade").value;
+    let desc2 = document.getElementById("desc").value;
+    xhttp.onreadystatechange = function() {
+        let info = this.responseText;
+        console.log(info);
+    }
+    xhttp.open("GET", "http://localhost:8080/project1final/submitrequest.do?eventtype="+
+        eventtype2+"&loc="+loc2+"&gformat="+gformat2+"&pgrade="+pgrade2+"&desc="+desc2+"&price="+price2, true);
+    xhttp.send();
+    document.getElementById("successmsg").innerHTML = "Reimbursement requested!";
+    console.log('msg sent');
+}
+function displayRequests() {
+    console.log('in the display personal sec');
+    let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4)
+        {
+            console.log('hi there');
+            let val = JSON.parse(this.responseText);
+            console.log(val);
+            parseJSONrequests(val, "requestview");
+
+        }
+    }
+    xhttp.open("GET", "http://localhost:8080/project1final/personalreq.do", true);
+    xhttp.send();
+}
+function parseJSONrequests(val, viewz) {
+    document.getElementById(viewz).style.display = 'block';
+    var reqview = document.getElementById(viewz).innerHTML;
+    let remaining = 1000;
+    let listy = '';
+    console.log(val.length);
+    for (let i = 0; i < val.length; i++){
+        console.log('parsing json');
+        remaining -= val[i].price;
+        listy += `<br>User ID: ${val[i].u_id}<br>
+        Request ID: ${val[i].r_id} <br> 
+        Reimbursement amount: $${val[i].price} <br>
+        Event type: ${val[i].event_type} <br>
+        Location: ${val[i].location} <br>
+        Description: ${val[i].description} <br>
+        Passing grade: ${val[i].grade_pass} <br>
+        Approval level: ${val[i].approval}<br>
+        -----------------------------------
+        <br> `;
+    }
+    if (viewz == "requestview"){
+        listy += `<br>Remaining amount of reimbursement funds: $${remaining}`
+    }
+    else{
+        listy += `Enter Request ID:`
+    }
+    console.log(listy);
+    document.getElementById(viewz).innerHTML = listy;
+}
+function approveRequest() {
+    hideAll();
+    document.getElementById("subrequests1").style.display = 'block';
+    console.log('in the display sub sec');
+    let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4)
+        {
+            console.log('hi there');
+            let val = JSON.parse(this.responseText);
+            console.log(val);
+            parseJSONrequests(val, "subrequests");
+        }
+    }
+    xhttp.open("GET", "http://localhost:8080/project1final/subreqs.do", true);
+    xhttp.send();
+    
+}
+function submitAccept() {
+    let val = document.getElementById("selection1").value;
+    let xhttp = new XMLHttpRequest();
+    console.log('in submitAccept');
+    xhttp.open("GET", "http://localhost:8080/project1final/acceptreim.do?rid="+val, true); 
+    xhttp.send();
+    document.getElementById("successmsg2").innerHTML = `Request #${val} approved!`;
+}
+function denyAccept() {
+    let val = document.getElementById("selection1").value;
+    let xhttp = new XMLHttpRequest();
+    console.log('in denyAccept');
+    xhttp.open("GET", "http://localhost:8080/project1final/denyreim.do?rid="+val, true); 
+    xhttp.send();
+    document.getElementById("successmsg2").innerHTML = `Request #${val} denied :'(`;
+}
+function hideAll() {
+    document.getElementById("requestform").style.display = 'none';
+    document.getElementById("requestview").style.display = 'none';
+    document.getElementById("subrequests1").style.display = 'none';
+}
+function logout() {
+    let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            window.location.replace(this.responseURL);
+        }
+    }
+    xhttp.open("GET", "http://localhost:8080/project1final/logout.do", true);
+    xhttp.send();
+}
+Collapse
+
+
+
+
+
+</script>
+</html>

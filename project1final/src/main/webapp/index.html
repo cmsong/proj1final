@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>  
+    <style> 
+        body{
+            background-image: url("https://images.pexels.com/photos/730896/pexels-photo-730896.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260");
+            background-size: cover; 
+            color: white;
+            padding-left: 1cm;
+        }
+    </style>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Login</title> 
+</head> 
+<body style="color: white"> 
+    <h1 style="color: white">Employee Login</h1>
+    <br>
+    <br><div style="width: 500px;" class="form-group">
+    User name: <input type="text" class="form-control" id="username"/></div>
+    <div style="width: 500px;" class="form-group">Password: <input type="password" class="form-control" id="password"/></div><br>
+       <button onclick="login()" type="button" class="btn btn-warning">Log-in</button>
+</body>
+<script>
+	function login(){
+        let user = document.getElementById("username").value;
+        let pass = document.getElementById("password").value;
+		console.log(user);
+		console.log(pass);
+		let xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+			if (this.readyState == 4){
+				let info = this.responseURL;
+				console.log(info);
+				window.location.replace(info);
+			}
+		}
+		xhttp.open("GET", "http://localhost:8080/project1final/login.do?username="+user+"&password="+pass, true);
+		xhttp.send();
+	}
+</script>
+</html>
+ 
